@@ -43,14 +43,21 @@
     box-shadow: 0 2px 20px rgba(0,0,0,0.3);
   }
   .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    text-decoration: none;
+  }
+  .nav-logo img { height: 38px; width: auto; }
+  .nav-logo-text {
     font-family: 'Noto Serif TC', serif;
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 700;
     color: var(--white);
-    text-decoration: none;
     letter-spacing: 0.05em;
+    line-height: 1.2;
   }
-  .nav-logo span { color: var(--gold); }
+  .nav-logo-text span { color: var(--gold); font-size: 0.75rem; display: block; font-weight: 400; letter-spacing: 0.08em; }
   .nav-links { display: flex; gap: 2rem; list-style: none; }
   .nav-links a {
     color: rgba(255,255,255,0.85);
@@ -496,7 +503,10 @@
 
 <!-- Navbar -->
 <nav id="navbar">
-  <a href="#hero" class="nav-logo">尚典<span>│</span>IP</a>
+  <a href="#hero" class="nav-logo">
+    <img src="logo.jpg" alt="尚典LOGO">
+    <div class="nav-logo-text">尚典國際智權法律事務所<span>Shangdian International IP Law Office</span></div>
+  </a>
   <ul class="nav-links">
     <li><a href="#about">關於我們</a></li>
     <li><a href="#services">服務項目</a></li>
@@ -511,6 +521,7 @@
   <div class="hero-bg"></div>
   <div class="hero-deco">⚖</div>
   <div class="hero-content">
+    <img src="logo.jpg" alt="尚典LOGO" style="height:80px;width:auto;margin-bottom:1.2rem;border-radius:50%;border:2px solid rgba(201,168,76,0.4);">
     <div class="hero-badge">SINCE 2010 · 彰化員林</div>
     <h1 class="hero-title">尚典國際智權法律事務所</h1>
     <p class="hero-title-en">Shangdian International IP Law Office</p>
