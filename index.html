@@ -474,6 +474,97 @@
   .footer-links a { color: rgba(255,255,255,0.5); text-decoration: none; font-size: 0.82rem; transition: color 0.2s; }
   .footer-links a:hover { color: var(--gold); }
 
+  /* ── Auth Modal ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 2000;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal {
+    background: var(--white);
+    border-radius: 8px;
+    padding: 2.5rem;
+    width: 90%; max-width: 440px;
+    position: relative;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+  }
+  .modal-close {
+    position: absolute; top: 1rem; right: 1rem;
+    background: none; border: none; font-size: 1.3rem;
+    cursor: pointer; color: var(--text-light);
+    line-height: 1;
+  }
+  .modal-close:hover { color: var(--navy); }
+  .modal-title {
+    font-family: 'Noto Serif TC', serif;
+    font-size: 1.4rem; font-weight: 700;
+    color: var(--navy); margin-bottom: 0.3rem;
+  }
+  .modal-sub { font-size: 0.85rem; color: var(--text-light); margin-bottom: 1.5rem; }
+  .modal-tabs {
+    display: flex; gap: 0; margin-bottom: 1.5rem;
+    border-bottom: 2px solid #eee;
+  }
+  .modal-tab {
+    flex: 1; padding: 0.6rem;
+    background: none; border: none;
+    font-size: 0.9rem; font-family: 'Noto Sans TC', sans-serif;
+    cursor: pointer; color: var(--text-light);
+    border-bottom: 2px solid transparent; margin-bottom: -2px;
+    transition: all 0.2s;
+  }
+  .modal-tab.active { color: var(--navy); border-bottom-color: var(--gold); font-weight: 700; }
+  .modal-form { display: none; }
+  .modal-form.active { display: block; }
+  .modal-form .form-group { margin-bottom: 1rem; }
+  .modal-form label { display: block; font-size: 0.85rem; color: var(--text); margin-bottom: 0.35rem; font-weight: 500; }
+  .modal-form input {
+    width: 100%; padding: 0.65rem 0.9rem;
+    border: 1px solid #ddd; border-radius: 4px;
+    font-size: 0.9rem; font-family: 'Noto Sans TC', sans-serif;
+    transition: border-color 0.2s;
+  }
+  .modal-form input:focus { outline: none; border-color: var(--gold); }
+  .modal-btn {
+    width: 100%; padding: 0.75rem;
+    background: var(--navy); color: var(--white);
+    border: none; border-radius: 4px;
+    font-size: 0.95rem; font-weight: 700;
+    font-family: 'Noto Sans TC', sans-serif;
+    cursor: pointer; margin-top: 0.5rem;
+    transition: background 0.2s;
+  }
+  .modal-btn:hover { background: var(--navy-light); }
+  .modal-btn:disabled { background: #aaa; cursor: not-allowed; }
+  .modal-error {
+    background: #fff0f0; border: 1px solid #fcc;
+    color: #c00; padding: 0.6rem 0.8rem;
+    border-radius: 4px; font-size: 0.85rem;
+    margin-bottom: 1rem; display: none;
+  }
+  .modal-success {
+    background: #f0fff4; border: 1px solid #9be9a8;
+    color: #1a7f37; padding: 0.6rem 0.8rem;
+    border-radius: 4px; font-size: 0.85rem;
+    margin-bottom: 1rem; display: none;
+  }
+  /* 已登入狀態 */
+  .nav-user {
+    display: none; align-items: center; gap: 0.6rem;
+    color: var(--white); font-size: 0.85rem;
+  }
+  .nav-user.show { display: flex; }
+  .nav-user-name { color: var(--gold); font-weight: 600; }
+  .nav-logout {
+    background: none; border: 1px solid rgba(255,255,255,0.3);
+    color: rgba(255,255,255,0.7); padding: 0.3rem 0.7rem;
+    border-radius: 3px; font-size: 0.8rem; cursor: pointer;
+    font-family: 'Noto Sans TC', sans-serif;
+    transition: all 0.2s;
+  }
+  .nav-logout:hover { border-color: var(--gold); color: var(--gold); }
+
   /* ── Scroll Animation ── */
   .fade-in {
     opacity: 0;
@@ -513,8 +604,64 @@
     <li><a href="#news">智財資訊</a></li>
     <li><a href="#member">會員專區</a></li>
     <li><a href="#contact" class="nav-cta">立即諮詢</a></li>
+    <li id="nav-login-btn"><a href="#" onclick="openModal('login');return false;" style="color:rgba(255,255,255,0.7)">登入</a></li>
   </ul>
+  <div class="nav-user" id="nav-user">
+    <span>歡迎，<span class="nav-user-name" id="nav-user-name"></span></span>
+    <button class="nav-logout" onclick="logout()">登出</button>
+  </div>
 </nav>
+
+<!-- Auth Modal -->
+<div class="modal-overlay" id="auth-modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title">會員專區</div>
+    <div class="modal-sub">登入或註冊以使用完整服務</div>
+    <div class="modal-tabs">
+      <button class="modal-tab active" onclick="switchTab('login')">會員登入</button>
+      <button class="modal-tab" onclick="switchTab('register')">免費加入</button>
+    </div>
+
+    <!-- 登入表單 -->
+    <div class="modal-form active" id="form-login">
+      <div class="modal-error" id="login-error"></div>
+      <div class="modal-success" id="login-success"></div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="login-email" placeholder="您的 Email" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>密碼</label>
+        <input type="password" id="login-password" placeholder="密碼" autocomplete="current-password">
+      </div>
+      <button class="modal-btn" id="login-btn" onclick="doLogin()">登入</button>
+    </div>
+
+    <!-- 註冊表單 -->
+    <div class="modal-form" id="form-register">
+      <div class="modal-error" id="register-error"></div>
+      <div class="modal-success" id="register-success"></div>
+      <div class="form-group">
+        <label>姓名</label>
+        <input type="text" id="reg-name" placeholder="您的姓名">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="reg-email" placeholder="您的 Email" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>密碼 <span style="color:var(--text-light);font-weight:400">（至少 8 個字元）</span></label>
+        <input type="password" id="reg-password" placeholder="設定密碼" autocomplete="new-password">
+      </div>
+      <div class="form-group">
+        <label>電話 <span style="color:var(--text-light);font-weight:400">（選填）</span></label>
+        <input type="tel" id="reg-phone" placeholder="聯絡電話">
+      </div>
+      <button class="modal-btn" id="register-btn" onclick="doRegister()">立即加入</button>
+    </div>
+  </div>
+</div>
 
 <!-- Hero -->
 <section id="hero">
@@ -667,7 +814,7 @@
         <li>享有線上諮詢預約服務</li>
         <li>電子報定期訂閱</li>
       </ul>
-      <a href="#" class="btn-member btn-register">免費加入</a>
+      <a href="#" class="btn-member btn-register" onclick="openModal('register');return false;">免費加入</a>
     </div>
     <div class="member-card fade-in">
       <div class="member-icon">⭐</div>
@@ -678,7 +825,7 @@
         <li>文件線上閱覽與下載</li>
         <li>一般會員所有權益</li>
       </ul>
-      <a href="#" class="btn-member btn-login">登入查詢</a>
+      <a href="#" class="btn-member btn-login" onclick="openModal('login');return false;">登入查詢</a>
     </div>
   </div>
 </section>
@@ -765,28 +912,163 @@
 </footer>
 
 <script>
-// Navbar scroll effect
+// ── API 設定 ──
+const API = 'https://api-production-67c9.up.railway.app/api/v1';
+
+// ── Navbar scroll effect ──
 const navbar = document.getElementById('navbar');
 window.addEventListener('scroll', () => {
   navbar.classList.toggle('scrolled', window.scrollY > 50);
 });
 
-// Scroll fade-in animation
+// ── Scroll fade-in animation ──
 const observer = new IntersectionObserver((entries) => {
   entries.forEach(e => {
-    if (e.isIntersecting) {
-      e.target.classList.add('visible');
-    }
+    if (e.isIntersecting) e.target.classList.add('visible');
   });
 }, { threshold: 0.1 });
-
 document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 
-// Form submit
+// ── Form submit ──
 function handleSubmit(e) {
   e.preventDefault();
   alert('感謝您的諮詢！我們將於一個工作日內與您聯繫。');
   e.target.reset();
+}
+
+// ── Auth Modal ──
+function openModal(tab = 'login') {
+  document.getElementById('auth-modal').classList.add('active');
+  switchTab(tab);
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+  document.getElementById('auth-modal').classList.remove('active');
+  document.body.style.overflow = '';
+}
+function switchTab(tab) {
+  document.querySelectorAll('.modal-tab').forEach((t, i) => {
+    t.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'register'));
+  });
+  document.getElementById('form-login').classList.toggle('active', tab === 'login');
+  document.getElementById('form-register').classList.toggle('active', tab === 'register');
+}
+
+// ── 登入 ──
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-error');
+  const sucEl = document.getElementById('login-success');
+  const btn = document.getElementById('login-btn');
+
+  errEl.style.display = 'none';
+  sucEl.style.display = 'none';
+
+  if (!email || !password) { showErr(errEl, '請填寫 Email 與密碼'); return; }
+
+  btn.disabled = true; btn.textContent = '登入中...';
+  try {
+    const res = await fetch(`${API}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) { showErr(errEl, data.detail || '登入失敗'); return; }
+
+    // 儲存 token + 使用者資訊
+    localStorage.setItem('sd_token', data.access_token);
+    localStorage.setItem('sd_user', JSON.stringify(data.user));
+    updateNavUser(data.user);
+    sucEl.textContent = `歡迎回來，${data.user.full_name || data.user.email}！`;
+    sucEl.style.display = 'block';
+    setTimeout(closeModal, 1200);
+  } catch(e) {
+    showErr(errEl, '連線異常，請稍後再試');
+  } finally {
+    btn.disabled = false; btn.textContent = '登入';
+  }
+}
+
+// ── 註冊 ──
+async function doRegister() {
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const password = document.getElementById('reg-password').value;
+  const phone = document.getElementById('reg-phone').value.trim();
+  const errEl = document.getElementById('register-error');
+  const sucEl = document.getElementById('register-success');
+  const btn = document.getElementById('register-btn');
+
+  errEl.style.display = 'none';
+  sucEl.style.display = 'none';
+
+  if (!email || !password) { showErr(errEl, '請填寫 Email 與密碼'); return; }
+  if (password.length < 8) { showErr(errEl, '密碼至少需要 8 個字元'); return; }
+
+  btn.disabled = true; btn.textContent = '註冊中...';
+  try {
+    const res = await fetch(`${API}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, full_name: name || undefined, phone: phone || undefined }),
+    });
+    const data = await res.json();
+    if (!res.ok) { showErr(errEl, data.detail || '註冊失敗'); return; }
+
+    sucEl.textContent = '註冊成功！請使用您的帳號登入。';
+    sucEl.style.display = 'block';
+    setTimeout(() => switchTab('login'), 1500);
+  } catch(e) {
+    showErr(errEl, '連線異常，請稍後再試');
+  } finally {
+    btn.disabled = false; btn.textContent = '立即加入';
+  }
+}
+
+// ── 登出 ──
+function logout() {
+  localStorage.removeItem('sd_token');
+  localStorage.removeItem('sd_user');
+  document.getElementById('nav-user').classList.remove('show');
+  document.getElementById('nav-login-btn').style.display = '';
+}
+
+// ── 更新 Navbar 使用者狀態 ──
+function updateNavUser(user) {
+  const navUser = document.getElementById('nav-user');
+  const nameEl = document.getElementById('nav-user-name');
+  nameEl.textContent = user.full_name || user.email;
+  navUser.classList.add('show');
+  document.getElementById('nav-login-btn').style.display = 'none';
+}
+
+// ── 初始化：檢查是否已登入 ──
+(function init() {
+  const token = localStorage.getItem('sd_token');
+  const userStr = localStorage.getItem('sd_user');
+  if (token && userStr) {
+    try {
+      const user = JSON.parse(userStr);
+      updateNavUser(user);
+    } catch(e) { logout(); }
+  }
+})();
+
+// ── Enter 鍵觸發登入 ──
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+  if (e.key === 'Enter') {
+    if (document.getElementById('form-login').classList.contains('active')) doLogin();
+    else if (document.getElementById('form-register').classList.contains('active')) doRegister();
+  }
+});
+
+// ── 工具函數 ──
+function showErr(el, msg) {
+  el.textContent = msg;
+  el.style.display = 'block';
 }
 </script>
 </body>
