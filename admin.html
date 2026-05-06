@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>管理後台 | 尚典國際智權法律事務所</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1a2744;
+    --navy-light: #243460;
+    --gold: #c9a84c;
+    --dark: #0f1b2d;
+    --gray: #f5f5f0;
+    --text: #2c2c2c;
+    --text-light: #666;
+    --white: #ffffff;
+    --green: #1a7f37;
+    --red: #cc0000;
+    --sidebar: 240px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Noto Sans TC', sans-serif; background: #f0f2f5; color: var(--text); }
+
+  /* ── 登入遮罩 ── */
+  #login-screen {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0a0f1e 0%, #1a2744 100%);
+  }
+  .login-box {
+    background: var(--white); border-radius: 8px;
+    padding: 2.5rem; width: 360px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+  .login-logo { text-align: center; margin-bottom: 1.5rem; }
+  .login-logo h2 { font-size: 1.1rem; color: var(--navy); font-weight: 700; }
+  .login-logo p { font-size: 0.8rem; color: var(--gold); margin-top: 0.2rem; }
+  .login-box .form-group { margin-bottom: 1rem; }
+  .login-box label { display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 0.35rem; }
+  .login-box input {
+    width: 100%; padding: 0.65rem 0.9rem;
+    border: 1px solid #ddd; border-radius: 4px;
+    font-size: 0.9rem; font-family: inherit;
+  }
+  .login-box input:focus { outline: none; border-color: var(--gold); }
+  .login-btn {
+    width: 100%; padding: 0.75rem;
+    background: var(--navy); color: var(--white);
+    border: none; border-radius: 4px;
+    font-size: 0.95rem; font-weight: 700;
+    font-family: inherit; cursor: pointer; margin-top: 0.5rem;
+  }
+  .login-btn:hover { background: var(--navy-light); }
+  .login-error { background: #fff0f0; border: 1px solid #fcc; color: #c00; padding: 0.6rem 0.8rem; border-radius: 4px; font-size: 0.85rem; margin-bottom: 1rem; display: none; }
+
+  /* ── 主體 ── */
+  #app { display: none; min-height: 100vh; }
+
+  /* Sidebar */
+  .sidebar {
+    position: fixed; left: 0; top: 0; bottom: 0;
+    width: var(--sidebar);
+    background: var(--navy);
+    display: flex; flex-direction: column;
+    z-index: 100;
+  }
+  .sidebar-logo {
+    padding: 1.5rem 1.2rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .sidebar-logo h1 { font-size: 0.95rem; color: var(--white); font-weight: 700; line-height: 1.4; }
+  .sidebar-logo span { color: var(--gold); font-size: 0.75rem; }
+  .sidebar-nav { flex: 1; padding: 1rem 0; }
+  .nav-item {
+    display: flex; align-items: center; gap: 0.7rem;
+    padding: 0.75rem 1.2rem;
+    color: rgba(255,255,255,0.7);
+    cursor: pointer; font-size: 0.9rem;
+    transition: all 0.2s;
+    border-left: 3px solid transparent;
+  }
+  .nav-item:hover { color: var(--white); background: rgba(255,255,255,0.05); }
+  .nav-item.active { color: var(--gold); border-left-color: var(--gold); background: rgba(201,168,76,0.1); }
+  .nav-item .icon { font-size: 1.1rem; width: 20px; text-align: center; }
+  .sidebar-footer {
+    padding: 1rem 1.2rem;
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+  .sidebar-user { font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-bottom: 0.5rem; }
+  .sidebar-user strong { color: var(--gold); }
+  .logout-btn {
+    width: 100%; padding: 0.4rem;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.7); border-radius: 3px;
+    font-size: 0.8rem; cursor: pointer; font-family: inherit;
+  }
+  .logout-btn:hover { background: rgba(255,255,255,0.15); }
+
+  /* Main */
+  .main {
+    margin-left: var(--sidebar);
+    padding: 2rem;
+    min-height: 100vh;
+  }
+  .page { display: none; }
+  .page.active { display: block; }
+  .page-title {
+    font-size: 1.4rem; font-weight: 700; color: var(--navy);
+    margin-bottom: 1.5rem;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  /* Cards */
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+  .stat-card {
+    background: var(--white); border-radius: 8px; padding: 1.2rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+  .stat-card .num { font-size: 2rem; font-weight: 700; color: var(--navy); }
+  .stat-card .label { font-size: 0.82rem; color: var(--text-light); margin-top: 0.2rem; }
+
+  /* Table */
+  .table-card {
+    background: var(--white); border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    overflow: hidden; margin-bottom: 1.5rem;
+  }
+  .table-header {
+    padding: 1rem 1.5rem;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid #eee;
+  }
+  .table-header h3 { font-size: 1rem; font-weight: 700; color: var(--navy); }
+  table { width: 100%; border-collapse: collapse; }
+  th { background: #f8f9fa; padding: 0.75rem 1rem; text-align: left; font-size: 0.82rem; color: var(--text-light); font-weight: 600; white-space: nowrap; }
+  td { padding: 0.75rem 1rem; border-top: 1px solid #f0f0f0; font-size: 0.88rem; }
+  tr:hover td { background: #fafafa; }
+
+  /* Badges */
+  .badge {
+    display: inline-block; padding: 0.2rem 0.6rem;
+    border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+  }
+  .badge-admin { background: #fff3cd; color: #856404; }
+  .badge-client { background: #d1f2eb; color: #0d6e4f; }
+  .badge-member { background: #d0e8ff; color: #0a5296; }
+  .badge-visitor { background: #f0f0f0; color: #666; }
+  .badge-pending { background: #fff3cd; color: #856404; }
+  .badge-in_progress { background: #d0e8ff; color: #0a5296; }
+  .badge-approved { background: #d1f2eb; color: #0d6e4f; }
+  .badge-rejected { background: #fde8e8; color: #c00; }
+  .badge-completed { background: #e8e8e8; color: #555; }
+  .badge-patent { background: #e8d5ff; color: #5b21b6; }
+  .badge-trademark { background: #fde8d0; color: #9a3412; }
+  .badge-copyright { background: #d0f0e8; color: #065f46; }
+
+  /* Buttons */
+  .btn {
+    padding: 0.4rem 0.9rem; border-radius: 4px;
+    font-size: 0.82rem; font-family: inherit;
+    cursor: pointer; border: none; font-weight: 600;
+    transition: all 0.15s;
+  }
+  .btn-primary { background: var(--navy); color: var(--white); }
+  .btn-primary:hover { background: var(--navy-light); }
+  .btn-gold { background: var(--gold); color: var(--navy); }
+  .btn-gold:hover { background: #e2c378; }
+  .btn-sm { padding: 0.3rem 0.6rem; font-size: 0.78rem; }
+  .btn-outline { background: none; border: 1px solid #ddd; color: var(--text); }
+  .btn-outline:hover { border-color: var(--navy); color: var(--navy); }
+  .btn-danger { background: #fde8e8; color: var(--red); border: 1px solid #fcc; }
+  .btn-danger:hover { background: #fcc; }
+
+  /* Modal */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+  .modal-overlay.active { display: flex; }
+  .modal-box { background: var(--white); border-radius: 8px; padding: 2rem; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+  .modal-box h3 { font-size: 1.1rem; font-weight: 700; color: var(--navy); margin-bottom: 1.2rem; }
+  .form-group { margin-bottom: 1rem; }
+  .form-group label { display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 0.35rem; }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%; padding: 0.6rem 0.8rem;
+    border: 1px solid #ddd; border-radius: 4px;
+    font-size: 0.88rem; font-family: inherit;
+  }
+  .form-group textarea { height: 80px; resize: vertical; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .modal-actions { display: flex; gap: 0.7rem; justify-content: flex-end; margin-top: 1.2rem; }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 1.5rem; right: 1.5rem;
+    background: var(--navy); color: var(--white);
+    padding: 0.8rem 1.2rem; border-radius: 6px;
+    font-size: 0.88rem; z-index: 9999;
+    transform: translateY(100px); opacity: 0;
+    transition: all 0.3s;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { background: #1a7f37; }
+  .toast.error { background: var(--red); }
+
+  .empty { text-align: center; padding: 3rem; color: var(--text-light); font-size: 0.9rem; }
+  .loading { text-align: center; padding: 2rem; color: var(--text-light); }
+</style>
+</head>
+<body>
+
+<!-- 登入畫面 -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <h2>尚典國際智權法律事務所</h2>
+      <p>管理後台</p>
+    </div>
+    <div class="login-error" id="login-error"></div>
+    <div class="form-group">
+      <label>管理員 Email</label>
+      <input type="email" id="admin-email" placeholder="admin@example.com" value="marxchiang@me.com">
+    </div>
+    <div class="form-group">
+      <label>密碼</label>
+      <input type="password" id="admin-password" placeholder="密碼">
+    </div>
+    <button class="login-btn" onclick="adminLogin()">登入後台</button>
+  </div>
+</div>
+
+<!-- 主應用 -->
+<div id="app">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <h1>尚典智權<br>管理後台</h1>
+      <span>Shangdian Admin</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-item active" onclick="showPage('dashboard')"><span class="icon">📊</span> 總覽</div>
+      <div class="nav-item" onclick="showPage('cases')"><span class="icon">📁</span> 案件管理</div>
+      <div class="nav-item" onclick="showPage('members')"><span class="icon">👥</span> 會員管理</div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">登入：<strong id="admin-name">管理員</strong></div>
+      <button class="logout-btn" onclick="adminLogout()">登出</button>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+
+    <!-- 總覽 -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-title">總覽</div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="num" id="stat-cases">—</div><div class="label">案件總數</div></div>
+        <div class="stat-card"><div class="num" id="stat-members">—</div><div class="label">會員人數</div></div>
+        <div class="stat-card"><div class="num" id="stat-clients">—</div><div class="label">已成交客戶</div></div>
+        <div class="stat-card"><div class="num" id="stat-pending">—</div><div class="label">待處理案件</div></div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header"><h3>最近案件</h3><button class="btn btn-gold btn-sm" onclick="showPage('cases')">查看全部</button></div>
+        <table>
+          <thead><tr><th>案件編號</th><th>案件類型</th><th>客戶</th><th>狀態</th><th>建立日期</th></tr></thead>
+          <tbody id="recent-cases"><tr><td colspan="5" class="loading">載入中...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 案件管理 -->
+    <div class="page" id="page-cases">
+      <div class="page-title">
+        案件管理
+        <button class="btn btn-gold" onclick="openCaseModal()">＋ 新增案件</button>
+      </div>
+      <div class="table-card">
+        <table>
+          <thead><tr><th>案件編號</th><th>官方號</th><th>類型</th><th>標題</th><th>客戶</th><th>狀態</th><th>期限</th><th>操作</th></tr></thead>
+          <tbody id="cases-tbody"><tr><td colspan="8" class="loading">載入中...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 會員管理 -->
+    <div class="page" id="page-members">
+      <div class="page-title">會員管理</div>
+      <div class="table-card">
+        <table>
+          <thead><tr><th>ID</th><th>Email</th><th>姓名</th><th>角色</th><th>Email驗證</th><th>加入日期</th><th>操作</th></tr></thead>
+          <tbody id="members-tbody"><tr><td colspan="7" class="loading">載入中...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 案件 Modal -->
+<div class="modal-overlay" id="case-modal" onclick="if(event.target===this)closeCaseModal()">
+  <div class="modal-box">
+    <h3 id="case-modal-title">新增案件</h3>
+    <input type="hidden" id="case-id">
+    <div class="form-row">
+      <div class="form-group">
+        <label>案件編號 *</label>
+        <input type="text" id="case-number" placeholder="例：SD-2026-001">
+      </div>
+      <div class="form-group">
+        <label>官方申請號</label>
+        <input type="text" id="official-number" placeholder="核准後填入">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>案件類型 *</label>
+        <select id="case-type">
+          <option value="patent">專利</option>
+          <option value="trademark">商標</option>
+          <option value="copyright">著作權</option>
+          <option value="other">其他</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>狀態</label>
+        <select id="case-status">
+          <option value="pending">待處理</option>
+          <option value="in_progress">進行中</option>
+          <option value="approved">核准</option>
+          <option value="rejected">駁回</option>
+          <option value="appeal">申覆中</option>
+          <option value="completed">結案</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>案件標題 *</label>
+      <input type="text" id="case-title" placeholder="商標名稱 / 發明名稱">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>客戶姓名 *</label>
+        <input type="text" id="client-name" placeholder="客戶名稱">
+      </div>
+      <div class="form-group">
+        <label>客戶 Email *</label>
+        <input type="email" id="client-email" placeholder="client@email.com">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>申請日期</label>
+        <input type="date" id="filed-at">
+      </div>
+      <div class="form-group">
+        <label>下一期限</label>
+        <input type="date" id="deadline-at">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>內部備忘（客戶看不到）</label>
+      <textarea id="case-notes" placeholder="費用、注意事項..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeCaseModal()">取消</button>
+      <button class="btn btn-gold" onclick="saveCase()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+const API = 'https://api-production-67c9.up.railway.app/api/v1';
+let token = '';
+
+// ── 登入 ──
+async function adminLogin() {
+  const email = document.getElementById('admin-email').value.trim();
+  const password = document.getElementById('admin-password').value;
+  const errEl = document.getElementById('login-error');
+  errEl.style.display = 'none';
+
+  try {
+    const res = await fetch(`${API}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) { errEl.textContent = data.detail || '帳號或密碼錯誤'; errEl.style.display = 'block'; return; }
+    if (data.user.role !== 'admin') { errEl.textContent = '此帳號無管理員權限'; errEl.style.display = 'block'; return; }
+
+    token = data.access_token;
+    localStorage.setItem('admin_token', token);
+    document.getElementById('admin-name').textContent = data.user.full_name || data.user.email;
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    loadDashboard();
+  } catch(e) {
+    errEl.textContent = '連線失敗，請稍後再試'; errEl.style.display = 'block';
+  }
+}
+
+function adminLogout() {
+  token = '';
+  localStorage.removeItem('admin_token');
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+}
+
+// ── API helper ──
+async function api(path, method = 'GET', body = null) {
+  const opts = {
+    method,
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(`${API}${path}`, opts);
+  if (res.status === 401) { adminLogout(); return null; }
+  return res.ok ? res.json() : null;
+}
+
+// ── 頁面切換 ──
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(`page-${page}`).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.textContent.includes({ dashboard:'總覽', cases:'案件', members:'會員' }[page])) n.classList.add('active');
+  });
+  if (page === 'dashboard') loadDashboard();
+  if (page === 'cases') loadCases();
+  if (page === 'members') loadMembers();
+}
+
+// ── 總覽 ──
+async function loadDashboard() {
+  const [cases, members] = await Promise.all([api('/cases/'), api('/users/')]);
+  if (!cases || !members) return;
+
+  document.getElementById('stat-cases').textContent = cases.length;
+  document.getElementById('stat-members').textContent = members.length;
+  document.getElementById('stat-clients').textContent = members.filter(m => m.role === 'client' || m.role === 'admin').length;
+  document.getElementById('stat-pending').textContent = cases.filter(c => c.status === 'pending').length;
+
+  const tbody = document.getElementById('recent-cases');
+  const recent = cases.slice(0, 5);
+  tbody.innerHTML = recent.length ? recent.map(c => `
+    <tr>
+      <td><strong>${c.case_number}</strong></td>
+      <td><span class="badge badge-${c.case_type}">${typeLabel(c.case_type)}</span></td>
+      <td>${c.client_name}</td>
+      <td><span class="badge badge-${c.status}">${statusLabel(c.status)}</span></td>
+      <td>${c.created_at.slice(0,10)}</td>
+    </tr>`).join('') : '<tr><td colspan="5" class="empty">尚無案件</td></tr>';
+}
+
+// ── 案件 ──
+async function loadCases() {
+  const cases = await api('/cases/');
+  const tbody = document.getElementById('cases-tbody');
+  if (!cases) { tbody.innerHTML = '<tr><td colspan="8" class="empty">載入失敗</td></tr>'; return; }
+
+  tbody.innerHTML = cases.length ? cases.map(c => `
+    <tr>
+      <td><strong>${c.case_number}</strong></td>
+      <td>${c.official_number || '—'}</td>
+      <td><span class="badge badge-${c.case_type}">${typeLabel(c.case_type)}</span></td>
+      <td>${c.title}</td>
+      <td>${c.client_name}</td>
+      <td><span class="badge badge-${c.status}">${statusLabel(c.status)}</span></td>
+      <td>${c.deadline_at ? c.deadline_at.slice(0,10) : '—'}</td>
+      <td>
+        <button class="btn btn-sm btn-outline" onclick="editCase(${c.id})">編輯</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteCase(${c.id},'${c.case_number}')">刪除</button>
+      </td>
+    </tr>`).join('') : '<tr><td colspan="8" class="empty">尚無案件，點「新增案件」開始建立</td></tr>';
+}
+
+let _casesCache = [];
+async function editCase(id) {
+  const cases = await api('/cases/');
+  if (!cases) return;
+  _casesCache = cases;
+  const c = cases.find(x => x.id === id);
+  if (!c) return;
+
+  document.getElementById('case-modal-title').textContent = '編輯案件';
+  document.getElementById('case-id').value = c.id;
+  document.getElementById('case-number').value = c.case_number;
+  document.getElementById('official-number').value = c.official_number || '';
+  document.getElementById('case-type').value = c.case_type;
+  document.getElementById('case-status').value = c.status;
+  document.getElementById('case-title').value = c.title;
+  document.getElementById('client-name').value = c.client_name;
+  document.getElementById('client-email').value = c.client_email;
+  document.getElementById('filed-at').value = c.filed_at ? c.filed_at.slice(0,10) : '';
+  document.getElementById('deadline-at').value = c.deadline_at ? c.deadline_at.slice(0,10) : '';
+  document.getElementById('case-notes').value = c.notes || '';
+  document.getElementById('case-modal').classList.add('active');
+}
+
+async function deleteCase(id, num) {
+  if (!confirm(`確定刪除案件 ${num}？`)) return;
+  const res = await fetch(`${API}/cases/${id}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (res.ok) { showToast('已刪除', 'success'); loadCases(); }
+  else showToast('刪除失敗', 'error');
+}
+
+function openCaseModal() {
+  document.getElementById('case-modal-title').textContent = '新增案件';
+  document.getElementById('case-id').value = '';
+  document.getElementById('case-number').value = '';
+  document.getElementById('official-number').value = '';
+  document.getElementById('case-type').value = 'trademark';
+  document.getElementById('case-status').value = 'pending';
+  document.getElementById('case-title').value = '';
+  document.getElementById('client-name').value = '';
+  document.getElementById('client-email').value = '';
+  document.getElementById('filed-at').value = '';
+  document.getElementById('deadline-at').value = '';
+  document.getElementById('case-notes').value = '';
+  document.getElementById('case-modal').classList.add('active');
+}
+
+function closeCaseModal() { document.getElementById('case-modal').classList.remove('active'); }
+
+async function saveCase() {
+  const id = document.getElementById('case-id').value;
+  const body = {
+    case_number: document.getElementById('case-number').value.trim(),
+    official_number: document.getElementById('official-number').value.trim() || null,
+    case_type: document.getElementById('case-type').value,
+    status: document.getElementById('case-status').value,
+    title: document.getElementById('case-title').value.trim(),
+    client_name: document.getElementById('client-name').value.trim(),
+    client_email: document.getElementById('client-email').value.trim(),
+    filed_at: document.getElementById('filed-at').value || null,
+    deadline_at: document.getElementById('deadline-at').value || null,
+    notes: document.getElementById('case-notes').value.trim() || null,
+  };
+
+  if (!body.case_number || !body.title || !body.client_name || !body.client_email) {
+    showToast('請填寫必填欄位', 'error'); return;
+  }
+
+  const res = id
+    ? await fetch(`${API}/cases/${id}`, { method: 'PATCH', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+    : await fetch(`${API}/cases/`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+
+  if (res.ok) {
+    showToast(id ? '已更新' : '已新增', 'success');
+    closeCaseModal(); loadCases();
+  } else {
+    const err = await res.json();
+    showToast(err.detail || '儲存失敗', 'error');
+  }
+}
+
+// ── 會員 ──
+async function loadMembers() {
+  const members = await api('/users/');
+  const tbody = document.getElementById('members-tbody');
+  if (!members) { tbody.innerHTML = '<tr><td colspan="7" class="empty">載入失敗</td></tr>'; return; }
+
+  tbody.innerHTML = members.length ? members.map(m => `
+    <tr>
+      <td>${m.id}</td>
+      <td>${m.email}</td>
+      <td>${m.full_name || '—'}</td>
+      <td><span class="badge badge-${m.role}">${roleLabel(m.role)}</span></td>
+      <td>${m.is_email_verified ? '✅' : '❌'}</td>
+      <td>${m.created_at.slice(0,10)}</td>
+      <td>
+        ${m.role !== 'admin' ? `
+        <select onchange="updateRole(${m.id}, this.value)" style="font-size:0.78rem;padding:0.2rem 0.4rem;border-radius:3px;border:1px solid #ddd">
+          <option value="visitor" ${m.role==='visitor'?'selected':''}>訪客</option>
+          <option value="member" ${m.role==='member'?'selected':''}>一般會員</option>
+          <option value="client" ${m.role==='client'?'selected':''}>已成交客戶</option>
+        </select>` : '<span style="color:var(--gold);font-size:0.78rem">管理員</span>'}
+      </td>
+    </tr>`).join('') : '<tr><td colspan="7" class="empty">尚無會員</td></tr>';
+}
+
+async function updateRole(userId, role) {
+  const res = await fetch(`${API}/users/${userId}/role`, {
+    method: 'PATCH',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ role }),
+  });
+  if (res.ok) showToast('角色已更新', 'success');
+  else showToast('更新失敗', 'error');
+}
+
+// ── 工具 ──
+function typeLabel(t) { return { patent:'專利', trademark:'商標', copyright:'著作權', other:'其他' }[t] || t; }
+function statusLabel(s) { return { pending:'待處理', in_progress:'進行中', approved:'核准', rejected:'駁回', appeal:'申覆中', completed:'結案', abandoned:'放棄' }[s] || s; }
+function roleLabel(r) { return { visitor:'訪客', member:'一般會員', client:'已成交客戶', admin:'管理員' }[r] || r; }
+
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── Enter 登入 ──
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('login-screen').style.display !== 'none') adminLogin();
+});
+
+// ── 初始化：檢查已登入 ──
+(async function init() {
+  const saved = localStorage.getItem('admin_token');
+  if (saved) {
+    token = saved;
+    const user = await fetch(`${API}/auth/me`, { headers: { 'Authorization': `Bearer ${token}` } });
+    if (user.ok) {
+      const u = await user.json();
+      if (u.role === 'admin') {
+        document.getElementById('admin-name').textContent = u.full_name || u.email;
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+        loadDashboard();
+        return;
+      }
+    }
+    token = '';
+    localStorage.removeItem('admin_token');
+  }
+})();
+</script>
+</body>
+</html>

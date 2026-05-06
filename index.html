@@ -608,6 +608,7 @@
   </ul>
   <div class="nav-user" id="nav-user">
     <span>歡迎，<span class="nav-user-name" id="nav-user-name"></span></span>
+    <a id="nav-admin-link" href="admin.html" style="display:none;color:var(--gold);font-size:0.82rem;margin:0 0.5rem;text-decoration:none">後台</a>
     <button class="nav-logout" onclick="logout()">登出</button>
   </div>
 </nav>
@@ -1042,6 +1043,10 @@ function updateNavUser(user) {
   nameEl.textContent = user.full_name || user.email;
   navUser.classList.add('show');
   document.getElementById('nav-login-btn').style.display = 'none';
+  // 管理員顯示後台連結
+  if (user.role === 'admin') {
+    document.getElementById('nav-admin-link').style.display = 'inline';
+  }
 }
 
 // ── 初始化：檢查是否已登入 ──
