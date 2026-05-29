@@ -941,23 +941,26 @@
 
     </div>
     <form class="contact-form fade-in" onsubmit="handleSubmit(event)">
+      <input type="hidden" name="access_key" value="2cb8a3d0-4ee7-464b-ba1f-105cb37f3870">
+      <input type="hidden" name="subject" value="尚典官網諮詢表單">
+      <input type="checkbox" name="botcheck" style="display:none">
       <div class="form-row">
         <div class="form-group">
           <label>姓名 *</label>
-          <input type="text" placeholder="您的姓名" required>
+          <input type="text" name="name" placeholder="您的姓名" required>
         </div>
         <div class="form-group">
           <label>電話</label>
-          <input type="tel" placeholder="連絡電話">
+          <input type="tel" name="phone" placeholder="連絡電話">
         </div>
       </div>
       <div class="form-group">
         <label>Email *</label>
-        <input type="email" placeholder="您的 Email" required>
+        <input type="email" name="email" placeholder="您的 Email" required>
       </div>
       <div class="form-group">
         <label>諮詢主題</label>
-        <select>
+        <select name="topic">
           <option value="">請選擇諮詢類別</option>
           <option>專利申請</option>
           <option>商標申請</option>
@@ -971,7 +974,7 @@
       </div>
       <div class="form-group">
         <label>留言內容 *</label>
-        <textarea placeholder="請描述您的需求或問題..." required></textarea>
+        <textarea name="message" placeholder="請描述您的需求或問題..." required></textarea>
       </div>
       <button type="submit" class="btn-submit">送出諮詢</button>
     </form>
@@ -1014,10 +1017,30 @@ const observer = new IntersectionObserver((entries) => {
 document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 
 // ── Form submit ──
-function handleSubmit(e) {
+async function handleSubmit(e) {
   e.preventDefault();
-  alert('感謝您的諮詢！我們將於一個工作日內與您聯繫。');
-  e.target.reset();
+  const form = e.target;
+  const btn = form.querySelector('.btn-submit');
+  btn.textContent = '送出中...';
+  btn.disabled = true;
+  try {
+    const data = new FormData(form);
+    const res = await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      body: data
+    });
+    const json = await res.json();
+    if (json.success) {
+      alert('感謝您的諮詢！我們將於一個工作日內與您聯繫。');
+      form.reset();
+    } else {
+      alert('送出失敗，請直接來電或 Email 聯繫。');
+    }
+  } catch(err) {
+    alert('網路錯誤，請直接來電或 Email 聯繫。');
+  }
+  btn.textContent = '送出諮詢';
+  btn.disabled = false;
 }
 
 // ── Auth Modal ──
