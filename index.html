@@ -251,6 +251,25 @@
   }
   .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
 
+  .btn-line-hero {
+    display: inline-flex; align-items: center; justify-content: center;
+    background: #06C755; color: #fff !important; border: none;
+    padding: 0.8rem 2rem; border-radius: 4px; font-size: 1rem; font-weight: 600;
+    letter-spacing: 0.04em; text-decoration: none; transition: background 0.2s, transform 0.2s;
+  }
+  .btn-line-hero:hover { background: #04a344; transform: translateY(-2px); }
+
+  .line-float {
+    position: fixed; bottom: 28px; right: 24px; z-index: 999;
+    background: #06C755; color: #fff; border-radius: 50px;
+    padding: 12px 18px; display: flex; align-items: center; gap: 8px;
+    font-size: 0.9rem; font-weight: 700; text-decoration: none;
+    box-shadow: 0 4px 20px rgba(6,199,85,0.4);
+    transition: background 0.2s, transform 0.2s;
+  }
+  .line-float:hover { background: #04a344; transform: translateY(-3px); }
+  .line-float svg { flex-shrink: 0; }
+
   /* ── Sections ── */
   section { padding: 90px 5%; }
   .section-title {
@@ -762,6 +781,10 @@
     <p class="hero-sub">專業守護您的智慧財產 · 全方位法律服務<br>從申請、分析到維權，陪您走每一步</p>
     <div class="hero-btns">
       <a href="#contact" class="btn-primary">立即諮詢</a>
+      <a href="https://line.me/R/ti/p/@shangdian" target="_blank" rel="noopener" class="btn-line-hero">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:6px"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.064-.022.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+        LINE 諮詢
+      </a>
       <a href="#services" class="btn-outline">了解服務</a>
     </div>
   </div>
@@ -994,6 +1017,7 @@
       <a href="#services">服務項目</a>
       <a href="#member">會員專區</a>
       <a href="#contact">聯絡我們</a>
+      <a href="https://line.me/R/ti/p/@shangdian" target="_blank" rel="noopener" style="color:#06C755 !important">LINE @shangdian</a>
     </div>
   </div>
 </footer>
@@ -1191,5 +1215,10 @@ function showErr(el, msg) {
   el.style.display = 'block';
 }
 </script>
+<!-- LINE 浮動按鈕 -->
+<a href="https://line.me/R/ti/p/@shangdian" target="_blank" rel="noopener" class="line-float" aria-label="LINE 諮詢">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.064-.022.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+  LINE 諮詢
+</a>
 </body>
 </html>
