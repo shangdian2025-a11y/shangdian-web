@@ -240,8 +240,6 @@
       <div class="nav-item active" onclick="showPage('dashboard')"><span class="icon">📊</span> 總覽</div>
       <div class="nav-item" onclick="showPage('cases')"><span class="icon">📁</span> 案件管理</div>
       <div class="nav-item" onclick="showPage('members')"><span class="icon">👥</span> 會員管理</div>
-      <div class="nav-item" onclick="showPage('articles')"><span class="icon">📝</span> 文章管理</div>
-      <div class="nav-item" onclick="showPage('analytics')"><span class="icon">📈</span> 訪客統計</div>
     </nav>
     <div class="sidebar-footer">
       <div class="sidebar-user">登入：<strong id="admin-name">管理員</strong></div>
@@ -296,97 +294,6 @@
       </div>
     </div>
 
-    <!-- 文章管理 -->
-    <div class="page" id="page-articles">
-      <div class="page-title">
-        文章管理
-        <button class="btn btn-gold" onclick="openArticleModal()">＋ 新增文章</button>
-      </div>
-      <div class="table-card">
-        <table>
-          <thead><tr><th>ID</th><th>標題</th><th>分類</th><th>狀態</th><th>瀏覽</th><th>建立日期</th><th>操作</th></tr></thead>
-          <tbody id="articles-tbody"><tr><td colspan="7" class="loading">載入中...</td></tr></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- 訪客統計 -->
-    <div class="page" id="page-analytics">
-      <div class="page-title">訪客統計</div>
-      <div class="stats-row">
-        <div class="stat-card"><div class="num" id="pv-today">—</div><div class="label">今日 PV</div></div>
-        <div class="stat-card"><div class="num" id="pv-yesterday">—</div><div class="label">昨日 PV</div></div>
-        <div class="stat-card"><div class="num" id="pv-week">—</div><div class="label">本週 PV</div></div>
-        <div class="stat-card"><div class="num" id="pv-month">—</div><div class="label">本月 PV</div></div>
-        <div class="stat-card"><div class="num" id="pv-total">—</div><div class="label">歷史累計</div></div>
-      </div>
-
-      <div class="table-card">
-        <div class="table-header"><h3>近 30 天每日瀏覽</h3></div>
-        <div id="pv-chart" style="padding:1rem 1.5rem 1.5rem;height:180px;display:flex;align-items:flex-end;gap:3px;">
-          <div class="loading" style="width:100%;text-align:center">載入中...</div>
-        </div>
-      </div>
-
-      <div class="table-card">
-        <div class="table-header"><h3>熱門頁面 Top 10（近30天）</h3></div>
-        <table>
-          <thead><tr><th>#</th><th>頁面</th><th style="text-align:right">瀏覽次數</th></tr></thead>
-          <tbody id="popular-tbody"><tr><td colspan="3" class="loading">載入中...</td></tr></tbody>
-        </table>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<!-- 文章 Modal -->
-<div class="modal-overlay" id="article-modal" onclick="if(event.target===this)closeArticleModal()">
-  <div class="modal-box" style="max-width:720px">
-    <h3 id="article-modal-title">新增文章</h3>
-    <input type="hidden" id="article-id">
-    <div class="form-row">
-      <div class="form-group">
-        <label>標題 *</label>
-        <input type="text" id="article-title" placeholder="文章標題">
-      </div>
-      <div class="form-group">
-        <label>Slug (網址) *</label>
-        <input type="text" id="article-slug" placeholder="例：patent-basics">
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label>分類</label>
-        <select id="article-category">
-          <option value="news">最新消息</option>
-          <option value="patent">專利知識</option>
-          <option value="trademark">商標知識</option>
-          <option value="copyright">著作權</option>
-          <option value="ip_case">智財案例</option>
-          <option value="other">其他</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>發佈狀態</label>
-        <select id="article-published">
-          <option value="false">草稿（不公開）</option>
-          <option value="true">已發佈</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-group">
-      <label>摘要（列表顯示，選填）</label>
-      <textarea id="article-summary" rows="2" placeholder="一兩句話簡介"></textarea>
-    </div>
-    <div class="form-group">
-      <label>內文 *（支援 Markdown / HTML）</label>
-      <textarea id="article-content" rows="12" placeholder="文章內容..." style="font-family:'SF Mono',Menlo,Consolas,monospace;font-size:0.85rem"></textarea>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeArticleModal()">取消</button>
-      <button class="btn btn-gold" onclick="saveArticle()">儲存</button>
-    </div>
   </div>
 </div>
 
@@ -521,15 +428,12 @@ function showPage(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById(`page-${page}`).classList.add('active');
-  const labelMap = { dashboard:'總覽', cases:'案件', members:'會員', articles:'文章', analytics:'訪客' };
   document.querySelectorAll('.nav-item').forEach(n => {
-    if (labelMap[page] && n.textContent.includes(labelMap[page])) n.classList.add('active');
+    if (n.textContent.includes({ dashboard:'總覽', cases:'案件', members:'會員' }[page])) n.classList.add('active');
   });
   if (page === 'dashboard') loadDashboard();
   if (page === 'cases') loadCases();
   if (page === 'members') loadMembers();
-  if (page === 'articles') loadArticles();
-  if (page === 'analytics') loadAnalytics();
 }
 
 // ── 總覽 ──
@@ -694,141 +598,10 @@ async function updateRole(userId, role) {
   else showToast('更新失敗', 'error');
 }
 
-// ── 文章 ──
-async function loadArticles() {
-  const arts = await api('/articles/admin/all');
-  const tbody = document.getElementById('articles-tbody');
-  if (!arts) { tbody.innerHTML = '<tr><td colspan="7" class="empty">載入失敗</td></tr>'; return; }
-  tbody.innerHTML = arts.length ? arts.map(a => `
-    <tr>
-      <td>${a.id}</td>
-      <td><strong>${escapeHtml(a.title)}</strong><br><span style="color:#888;font-size:0.75rem">/${escapeHtml(a.slug)}</span></td>
-      <td><span class="badge badge-${a.category}">${articleCategoryLabel(a.category)}</span></td>
-      <td>${a.is_published ? '<span style="color:var(--green);font-weight:600">✅ 已發佈</span>' : '<span style="color:#888">📝 草稿</span>'}</td>
-      <td>${a.view_count}</td>
-      <td>${a.created_at.slice(0,10)}</td>
-      <td>
-        <button class="btn btn-sm btn-outline" onclick="editArticle(${a.id})">編輯</button>
-        <button class="btn btn-sm btn-danger" onclick="deleteArticle(${a.id},'${escapeAttr(a.title)}')">刪除</button>
-      </td>
-    </tr>`).join('') : '<tr><td colspan="7" class="empty">尚無文章，點「新增文章」開始</td></tr>';
-}
-
-function openArticleModal() {
-  document.getElementById('article-modal-title').textContent = '新增文章';
-  document.getElementById('article-id').value = '';
-  document.getElementById('article-title').value = '';
-  document.getElementById('article-slug').value = '';
-  document.getElementById('article-category').value = 'news';
-  document.getElementById('article-published').value = 'false';
-  document.getElementById('article-summary').value = '';
-  document.getElementById('article-content').value = '';
-  document.getElementById('article-modal').classList.add('active');
-}
-
-function closeArticleModal() { document.getElementById('article-modal').classList.remove('active'); }
-
-async function editArticle(id) {
-  const a = await api(`/articles/admin/${id}`);
-  if (!a) { showToast('讀取失敗', 'error'); return; }
-  document.getElementById('article-modal-title').textContent = '編輯文章';
-  document.getElementById('article-id').value = a.id;
-  document.getElementById('article-title').value = a.title;
-  document.getElementById('article-slug').value = a.slug;
-  document.getElementById('article-category').value = a.category;
-  document.getElementById('article-published').value = a.is_published ? 'true' : 'false';
-  document.getElementById('article-summary').value = a.summary || '';
-  document.getElementById('article-content').value = a.content || '';
-  document.getElementById('article-modal').classList.add('active');
-}
-
-async function saveArticle() {
-  const id = document.getElementById('article-id').value;
-  const body = {
-    title: document.getElementById('article-title').value.trim(),
-    slug: document.getElementById('article-slug').value.trim(),
-    category: document.getElementById('article-category').value,
-    is_published: document.getElementById('article-published').value === 'true',
-    summary: document.getElementById('article-summary').value.trim() || null,
-    content: document.getElementById('article-content').value,
-  };
-  if (!body.title || !body.slug || !body.content) {
-    showToast('請填寫標題、Slug、內文', 'error'); return;
-  }
-  const url = id ? `${API}/articles/${id}` : `${API}/articles/`;
-  const method = id ? 'PATCH' : 'POST';
-  const payload = id ? body : body;  // create schema needs all, update partial - both accept same shape here
-  const res = await fetch(url, {
-    method,
-    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-  if (res.ok) {
-    showToast(id ? '已更新' : '已新增', 'success');
-    closeArticleModal(); loadArticles();
-  } else {
-    const err = await res.json().catch(() => ({}));
-    showToast(err.detail || '儲存失敗', 'error');
-  }
-}
-
-async function deleteArticle(id, title) {
-  if (!confirm(`確定刪除文章「${title}」？`)) return;
-  const res = await fetch(`${API}/articles/${id}`, {
-    method: 'DELETE',
-    headers: { 'Authorization': `Bearer ${token}` },
-  });
-  if (res.ok) { showToast('已刪除', 'success'); loadArticles(); }
-  else showToast('刪除失敗', 'error');
-}
-
-// ── 訪客統計 ──
-async function loadAnalytics() {
-  const [summary, daily, popular] = await Promise.all([
-    api('/analytics/summary'),
-    api('/analytics/daily?days=30'),
-    api('/analytics/popular?limit=10'),
-  ]);
-
-  if (summary) {
-    document.getElementById('pv-today').textContent = summary.today;
-    document.getElementById('pv-yesterday').textContent = summary.yesterday;
-    document.getElementById('pv-week').textContent = summary.this_week;
-    document.getElementById('pv-month').textContent = summary.this_month;
-    document.getElementById('pv-total').textContent = summary.total;
-  }
-
-  const chart = document.getElementById('pv-chart');
-  if (daily && daily.length) {
-    const max = Math.max(...daily.map(d => d.count), 1);
-    chart.innerHTML = daily.map(d => {
-      const h = Math.max(2, Math.round(d.count / max * 150));
-      return `<div title="${d.date}: ${d.count}" style="flex:1;background:linear-gradient(180deg,var(--gold) 0%,var(--navy-light) 100%);height:${h}px;border-radius:2px 2px 0 0;min-width:8px"></div>`;
-    }).join('');
-  } else {
-    chart.innerHTML = '<div class="empty" style="width:100%;text-align:center">尚無資料</div>';
-  }
-
-  const popBody = document.getElementById('popular-tbody');
-  if (popular && popular.length) {
-    popBody.innerHTML = popular.map((p, i) => `
-      <tr>
-        <td><strong>${i+1}</strong></td>
-        <td>${escapeHtml(p.page)}</td>
-        <td style="text-align:right;font-weight:700;color:var(--navy)">${p.count}</td>
-      </tr>`).join('');
-  } else {
-    popBody.innerHTML = '<tr><td colspan="3" class="empty">尚無瀏覽資料</td></tr>';
-  }
-}
-
 // ── 工具 ──
 function typeLabel(t) { return { patent:'專利', trademark:'商標', copyright:'著作權', other:'其他' }[t] || t; }
 function statusLabel(s) { return { pending:'待處理', in_progress:'進行中', approved:'核准', rejected:'駁回', appeal:'申覆中', completed:'結案', abandoned:'放棄' }[s] || s; }
 function roleLabel(r) { return { visitor:'訪客', member:'一般會員', client:'已成交客戶', admin:'管理員' }[r] || r; }
-function articleCategoryLabel(c) { return { patent:'專利知識', trademark:'商標知識', copyright:'著作權', ip_case:'智財案例', news:'最新消息', other:'其他' }[c] || c; }
-function escapeHtml(s) { return String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-function escapeAttr(s) { return String(s||'').replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
 
 function showToast(msg, type = '') {
   const t = document.getElementById('toast');
